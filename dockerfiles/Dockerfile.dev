@@ -1,21 +1,33 @@
-FROM python:3.12
+FROM python:3.12-slim
 ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update && apt-get install -y \
-    binutils \
-    libproj-dev
+    netcat-openbsd \
+    postgresql-client \
+    gcc \
+    python3-dev \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-    WORKDIR /app
+WORKDIR /app
 
 COPY  ./requirements/common.txt /app/
 
+RUN pip install --no-cache-dir -r common.txt \
+    && pip install --no-cache-dir gunicorn
 
-RUN pip install -r common.txt
-RUN pip install -r dev.txt
 
 COPY ./src/ /app/
 
 EXPOSE 8080
+
+ENV WORKERS=4 \
+    LOG_LEVEL=info \
+    MODULE_NAME=main \
+    VARIABLE_NAME=app \
+    PORT=8080
+
+EXPOSE ${PORT}
 
 RUN chmod +x /app/entrypoint.sh
 
