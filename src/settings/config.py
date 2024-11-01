@@ -6,7 +6,9 @@ class Settings(BaseSettings):
     POSTGRES_SERVER: str = "localhost"
     POSTGRES_PORT: str = "5432"
     POSTGRES_DB: str = "map_my_world"
-    DATABASE_URL: str = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}"
+    SERVICE_NAME_DB: str = "database"
+    DATABASE_URL: str = f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{SERVICE_NAME_DB}:{POSTGRES_PORT}/{POSTGRES_DB}"
+    POSTGRES_POOL_SIZE: int = 10
 
     class Config:
         env_file = ".env"
