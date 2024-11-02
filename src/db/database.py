@@ -1,39 +1,40 @@
 from functools import cache
 
-from settings.config import Settings as s
-from sqlalchemy import create_engine
-from sqlalchemy.engine import Engine
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from settings.settings import settings
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 
 class DB:
-    engine: Engine
+    engine: create_async_engine
     
     def __init__(
-        self, engine: Engine, session: sessionmaker | None = None
+        self, engine: create_async_engine, session: async_sessionmaker | None = None
     ) -> None:
         self.engine = engine
-        self._session = session or sessionmaker(autoflush=False, bind=engine)
+        self._session = session or async_sessionmaker(
+            bind=engine, autoflush=False, expire_on_commit=False
+        )
 
     @property
-    def session(self) -> Session:
-        return self._session()
+    async def session(self) -> AsyncSession:
+        async with self._session() as session:
+            yield session
 
 def create_db() -> DB:
-    engine = create_engine(
-        s.DATABASE_URL, pool_size=10, isolation_level="AUTOCOMMIT"
+    engine = create_async_engine(
+        settings.DATABASE_URL, pool_size=10, isolation_level="AUTOCOMMIT"
     )
-    SessionLocal = sessionmaker(autoflush=False, bind=engine)
+    SessionLocal = async_sessionmaker(autoflush=False, bind=engine, expire_on_commit=False)
     return DB(engine, SessionLocal)
 
 
 @cache
 def get_session_maker() -> async_sessionmaker:
     engine = create_async_engine(
-        s.DATABASE_URL,
-        pool_size=s.POSTGRES_POOL_SIZE,
+        settings.DATABASE_URL,
+        pool_size=settings.POSTGRES_POOL_SIZE,
         pool_pre_ping=True,
     )
     return async_sessionmaker(
