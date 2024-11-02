@@ -1,10 +1,11 @@
 import logging
 import sys
+from typing import List
 
 from fastapi import APIRouter, Depends, Path, status
 from fastapi.responses import JSONResponse
 
-from domain.locations import LocationBody, LocationData
+from domain.locations import LocationBody
 from responses.success import GenericResponse
 from services.locations import LocationService
 from utils.builder import location_service_builder
@@ -18,7 +19,7 @@ logger.info("API locations is starting up")
 
 
 @locations_router.get(
-    "/locations/{location_id}/",
+    "/{location_id}/",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_200_OK: {
@@ -36,13 +37,12 @@ logger.info("API locations is starting up")
             "description": "No location found with the provided ID.",
         },
     },
-    tags=["Locations - Get Location by ID"],
     response_model=GenericResponse,
 )
 async def get(
     location_id: int = Path(..., title="The ID of the location to retrieve"),
     service: LocationService = Depends(location_service_builder),
-) -> dict:
+) -> GenericResponse:
     response = await service.get(location_id=location_id)
     if not response:
         return JSONResponse(
@@ -53,7 +53,7 @@ async def get(
 
 
 @locations_router.get(
-    "/locations/",
+    "/",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_200_OK: {
@@ -65,18 +65,17 @@ async def get(
             "description": "Request was successful.",
         }
     },
-    tags=["Locations - List Locations"],
     response_model=GenericResponse,
 )
 async def list(
     service: LocationService = Depends(location_service_builder),
-) -> GenericResponse:
+) -> List[GenericResponse]:
     response = await service.list()
     return GenericResponse(data=response)
 
 
 @locations_router.post(
-    "/locations/",
+    "/",
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_201_CREATED: {
@@ -88,7 +87,6 @@ async def list(
             "description": "Request was successful.",
         }
     },
-    tags=["Locations - Create Location"],
     response_model=GenericResponse,
 )
 async def create(
@@ -100,7 +98,7 @@ async def create(
 
 
 @locations_router.put(
-    "/locations/{location_id}/",
+    "/{location_id}/",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_200_OK: {
@@ -118,7 +116,6 @@ async def create(
             "description": "No location found with the provided ID.",
         },
     },
-    tags=["Locations - Update Location"],
     response_model=GenericResponse,
 )
 async def update(
@@ -136,7 +133,7 @@ async def update(
 
 
 @locations_router.delete(
-    "/locations/{location_id}/",
+    "/{location_id}/",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
         status.HTTP_204_NO_CONTENT: {
@@ -149,7 +146,6 @@ async def update(
             "description": "No location found with the provided ID.",
         },
     },
-    tags=["Locations - Delete Location"],
 )
 async def delete(
     location_id: int = Path(..., title="The ID of the location to delete"),

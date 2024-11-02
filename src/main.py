@@ -1,8 +1,12 @@
-from db.database import Base, create_db
 from fastapi import FastAPI
+
+from db.database import Base, create_db
+from routers.categories import categories_router
 from routers.locations import locations_router
 
-description = """This is a simple API that allows you to manage places and recommendations."""
+description = (
+    """This is a simple API that allows you to manage places and recommendations."""
+)
 
 V1_PREFIX = "/api/v1"
 
@@ -11,7 +15,9 @@ app = FastAPI(
     version="0.0.1",
     description=description,
     openapi_url=f"/openapi.json",
-    docs_url=f"/docs",)
+    docs_url=f"/docs",
+)
+
 
 @app.get("/health/readiness/", tags=["Health"], status_code=200)
 def health() -> dict:
@@ -31,4 +37,11 @@ async def startup():
     async with db.engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-app.include_router(locations_router, prefix=f"{V1_PREFIX}/locations")
+
+app.include_router(
+    locations_router, prefix=f"{V1_PREFIX}/locations", tags=["Locations"]
+)
+
+app.include_router(
+    categories_router, prefix=f"{V1_PREFIX}/categories", tags=["Categories"]
+)

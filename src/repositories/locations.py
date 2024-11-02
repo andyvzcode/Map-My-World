@@ -26,7 +26,7 @@ class LocationRepository(BaseRepository):
             return None
         return LocationData.from_orm(data)
 
-    async def save(self, location: LocationData) -> None:
+    async def save(self, location: LocationBody) -> None:
         async with self.session_maker() as session:
             new_location = LocationModel(**location.dict())
             session.add(new_location)
@@ -47,9 +47,6 @@ class LocationRepository(BaseRepository):
             await session.commit()
 
         return LocationData.from_orm(data)
-
-    async def delete(self, location_id: int) -> None:
-        pass
 
     async def list(self) -> list[LocationData]:
         query = self.base_query
