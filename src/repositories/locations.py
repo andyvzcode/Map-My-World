@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import List, Optional
 
 from sqlalchemy import Select, select
 from sqlalchemy.ext.asyncio import async_sessionmaker
@@ -26,7 +26,7 @@ class LocationRepository(BaseRepository):
             return None
         return LocationData.from_orm(data)
 
-    async def save(self, location: LocationBody) -> None:
+    async def save(self, location: LocationBody) -> LocationData:
         async with self.session_maker() as session:
             new_location = LocationModel(**location.dict())
             session.add(new_location)
@@ -34,7 +34,9 @@ class LocationRepository(BaseRepository):
 
         return LocationData.from_orm(new_location)
 
-    async def update(self, location_id: int, location: LocationBody) -> None:
+    async def update(
+        self, location_id: int, location: LocationBody
+    ) -> Optional[LocationData]:
         async with self.session_maker() as session:
             query = self.base_query.filter(LocationModel.id == location_id)
             result = await session.execute(query)
@@ -48,7 +50,7 @@ class LocationRepository(BaseRepository):
 
         return LocationData.from_orm(data)
 
-    async def list(self) -> list[LocationData]:
+    async def list(self) -> List[LocationData]:
         query = self.base_query
         async with self.session_maker() as session:
             result = await session.execute(query)

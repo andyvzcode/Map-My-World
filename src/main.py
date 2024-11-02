@@ -1,8 +1,13 @@
+from aiocache import caches
 from fastapi import FastAPI
 
 from db.database import Base, create_db
 from routers.categories import categories_router
 from routers.locations import locations_router
+from routers.reviews import reviews_router
+from settings.settings import cache_settings
+
+cache_settings()
 
 description = (
     """This is a simple API that allows you to manage places and recommendations."""
@@ -45,3 +50,5 @@ app.include_router(
 app.include_router(
     categories_router, prefix=f"{V1_PREFIX}/categories", tags=["Categories"]
 )
+
+app.include_router(reviews_router, prefix=f"{V1_PREFIX}/reviews", tags=["Reviews"])

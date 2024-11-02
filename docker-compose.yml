@@ -8,18 +8,45 @@ services:
     volumes:
       - ./src:/app
     restart: on-failure
-    env_file: .env
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=map_my_world
+      - POSTGRES_HOST=database
+      - POSTGRES_SERVER=localhost
+      - POSTGRES_PORT=5432
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - SERVICE_NAME_DB=database
+      - SERVICE_REDIS=redis://redis:6379/0
     ports:
       - "8080:8080"
   database:
     image: postgres:14.1-alpine
     restart: always
-    env_file: .env
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=map_my_world
+      - POSTGRES_HOST=database
+      - POSTGRES_SERVER=localhost
+      - POSTGRES_PORT=5432
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - SERVICE_NAME_DB=database
+      - SERVICE_REDIS=redis://redis:6379/0
     ports:
       - '5433:5432'
     volumes:
       - db:/var/lib/postgresql/data
     depends_on:
       - api
+
+  redis:
+    image: redis:6.2.6-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+      
 volumes:
   db: {}
