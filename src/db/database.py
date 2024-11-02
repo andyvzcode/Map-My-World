@@ -1,14 +1,16 @@
 from functools import cache
 
-from settings.settings import settings
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
+                                    create_async_engine)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
+from settings.settings import settings
 
 
 class DB:
     engine: create_async_engine
-    
+
     def __init__(
         self, engine: create_async_engine, session: async_sessionmaker | None = None
     ) -> None:
@@ -22,11 +24,14 @@ class DB:
         async with self._session() as session:
             yield session
 
+
 def create_db() -> DB:
     engine = create_async_engine(
         settings.DATABASE_URL, pool_size=10, isolation_level="AUTOCOMMIT"
     )
-    SessionLocal = async_sessionmaker(autoflush=False, bind=engine, expire_on_commit=False)
+    SessionLocal = async_sessionmaker(
+        autoflush=False, bind=engine, expire_on_commit=False
+    )
     return DB(engine, SessionLocal)
 
 
